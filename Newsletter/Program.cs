@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Newtonsoft.Json;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -42,6 +43,22 @@ namespace Newsletter
             Console.WriteLine("\nCache command  : " + cacheCommand);
             Console.WriteLine("Cache response : \n" + cache.Execute("CLIENT", "LIST").ToString().Replace("id=", "id="));
 
+
+            //Optional JSON portion:
+            // Store .NET object to cache
+            Employee e007 = new Employee("007", "James Bond", 42);
+            Console.WriteLine("Cache response from storing Employee .NET object : " +
+                cache.StringSet("e007", JsonConvert.SerializeObject(e007)));
+
+            // Retrieve .NET object from cache
+            var employee = JsonConvert.DeserializeObject<Employee>(cache.StringGet("e007"));
+            Console.WriteLine("Deserialized Employee .NET object :\n");
+            Console.WriteLine("\tEmployee.Name : " + employee.Name);
+            Console.WriteLine("\tEmployee.Id   : " + employee.Id);
+            Console.WriteLine("\tEmployee.Age  : " + employee.Age + "\n");
+
+
+            //CLEANUP - Make sure this is after you are done working with cache!
             lazyConnection.Value.Dispose();
 
             Console.WriteLine("Completed");
